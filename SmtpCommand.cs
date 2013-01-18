@@ -18,7 +18,7 @@ namespace Smtp
 {
     using System;
 
-    public sealed class SmtpCommand
+    internal sealed class SmtpCommand
     {
         public const string TerminationSequence = "\r\n";
         public const string DataTerminationSequence = "\r\n.\r\n";

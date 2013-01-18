@@ -16,28 +16,23 @@
 
 namespace Smtp
 {
-    public sealed class SmtpReply
+    using System;
+
+    public sealed class MessageReceivedEventArgs : EventArgs
     {
-        public const string TerminationSequence = "\r\n";
+        private readonly SmtpMessage message;
 
-        public static readonly SmtpReply Ok = new SmtpReply(ReplyCode.Ok, "OK");
-
-        private readonly ReplyCode replyCode;
-        private readonly string message;
-
-        public SmtpReply(ReplyCode replyCode, string message)
+        internal MessageReceivedEventArgs(SmtpMessage message)
         {
-            this.replyCode = replyCode;
+            if (message == null)
+            {
+                throw new ArgumentNullException("message");
+            }
+
             this.message = message;
         }
 
-        public ReplyCode ReplyCode { get { return this.replyCode; } }
+        public SmtpMessage Message { get { return this.message; } }
 
-        public string Message { get { return this.message; } }
-
-        public override string ToString()
-        {
-            return ((int)this.replyCode) + " " + this.message + SmtpReply.TerminationSequence;
-        }
     }
 }

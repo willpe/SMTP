@@ -29,7 +29,10 @@ namespace Smtp
 
         public string From { get; set; }
 
-        public ICollection<string> To { get { return this.to; } }
+        public ICollection<string> To
+        {
+            get { return this.to; }
+        }
 
         public string Body { get; set; }
     }

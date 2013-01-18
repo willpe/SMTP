@@ -14,7 +14,6 @@
 // limitations under the License.
 //---------------------------------------------------------------------------------
 
-
 namespace Smtp
 {
     using System;
@@ -40,6 +39,8 @@ namespace Smtp
             this.SendReply(welcomeMessage);
             this.BeginRead();
         }
+
+        internal event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
         private void BeginRead()
         {
@@ -170,11 +171,6 @@ namespace Smtp
             this.OnMessageReceived();
         }
 
-        private void OnMessageReceived()
-        {
-
-        }
-
         private SmtpReply Quit(SmtpCommand command)
         {
             this.isClosed = true;
@@ -185,6 +181,16 @@ namespace Smtp
         {
             var sendBuffer = Encoding.UTF8.GetBytes(response.ToString());
             this.stream.Write(sendBuffer, 0, sendBuffer.Length);
+        }
+
+        private void OnMessageReceived()
+        {
+            if (this.MessageReceived != null)
+            {
+                var e = new MessageReceivedEventArgs(this.currentMessage);
+                this.MessageReceived(this, e);
+            }
+
         }
     }
 }

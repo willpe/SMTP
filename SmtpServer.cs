@@ -29,15 +29,14 @@ namespace Smtp
         {
             this.port = port;
             this.listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            this.WelcomeMessage = "Simple Mail Transfer Service Ready";
         }
+
+        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
         public int Port
         {
             get { return this.port; }
         }
-
-        public string WelcomeMessage { get; set; }
 
         public void Open()
         {
@@ -57,8 +56,17 @@ namespace Smtp
         {
             var acceptedSocket = this.listenSocket.EndAccept(result);
             var session = new SmtpSession(acceptedSocket);
+            session.MessageReceived += this.OnSessionMessageReceived;
 
             this.listenSocket.BeginAccept(this.OnAcceptingSocket, null);
+        }
+
+        private void OnSessionMessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            if (this.MessageReceived != null)
+            {
+                this.MessageReceived(this, e);
+            }
         }
     }
 }
