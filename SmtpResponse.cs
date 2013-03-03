@@ -1,43 +1,23 @@
-﻿//---------------------------------------------------------------------------------
-// Copyright (c) 2012, Microsoft Corporation
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//---------------------------------------------------------------------------------
+﻿namespace Smtp {
+	public sealed class SmtpReply {
+		public const string TerminationSequence = "\r\n";
 
-namespace Smtp
-{
-    public sealed class SmtpReply
-    {
-        public const string TerminationSequence = "\r\n";
+		public static readonly SmtpReply Ok = new SmtpReply(ReplyCode.Ok, "OK");
 
-        public static readonly SmtpReply Ok = new SmtpReply(ReplyCode.Ok, "OK");
+		private readonly ReplyCode replyCode;
+		private readonly string message;
 
-        private readonly ReplyCode replyCode;
-        private readonly string message;
+		public SmtpReply(ReplyCode replyCode, string message) {
+			this.replyCode = replyCode;
+			this.message = message;
+		}
 
-        public SmtpReply(ReplyCode replyCode, string message)
-        {
-            this.replyCode = replyCode;
-            this.message = message;
-        }
+		public ReplyCode ReplyCode { get { return this.replyCode; } }
 
-        public ReplyCode ReplyCode { get { return this.replyCode; } }
+		public string Message { get { return this.message; } }
 
-        public string Message { get { return this.message; } }
-
-        public override string ToString()
-        {
-            return ((int)this.replyCode) + " " + this.message + SmtpReply.TerminationSequence;
-        }
-    }
+		public override string ToString() {
+			return ((int)this.replyCode) + " " + this.message + SmtpReply.TerminationSequence;
+		}
+	}
 }
