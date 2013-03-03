@@ -21,25 +21,23 @@ namespace Smtp {
 		}
 
 		public void Open() {
-			var endpoint = new IPEndPoint(IPAddress.Any, this.port);
+			IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, this.port);
 			this.listenSocket.Bind(endpoint);
 			this.listenSocket.Listen(255);
-			this.listenSocket.BeginAccept(this.OnAcceptingSocket, null);
+			this.listenSocket.BeginAccept(this.onAcceptingSocket, null);
 		}
 
 		public void Close() {
 			this.listenSocket.Close();
 		}
 
-		private void OnAcceptingSocket(IAsyncResult result) {
-			var acceptedSocket = this.listenSocket.EndAccept(result);
-			var session = new SmtpSession(acceptedSocket);
-			session.MessageReceived += this.OnSessionMessageReceived;
-
-			this.listenSocket.BeginAccept(this.OnAcceptingSocket, null);
+		private void onAcceptingSocket(IAsyncResult result) {
+			var session = new SmtpSession(this.listenSocket.EndAccept(result));
+			session.MessageReceived += this.onSessionMessageReceived;
+			this.listenSocket.BeginAccept(this.onAcceptingSocket, null);
 		}
 
-		private void OnSessionMessageReceived(object sender, MessageReceivedEventArgs e) {
+		private void onSessionMessageReceived(object sender, MessageReceivedEventArgs e) {
 			if (this.MessageReceived != null) {
 				this.MessageReceived(this, e);
 			}
