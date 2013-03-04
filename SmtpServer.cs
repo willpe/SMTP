@@ -16,7 +16,7 @@ namespace Smtp {
 
 		public int Port {
 			get { 
-				return this.port; 
+				return port; 
 			}
 		}
 
@@ -24,11 +24,11 @@ namespace Smtp {
 			IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
 			listenSocket.Bind(endpoint);
 			listenSocket.Listen(255);
-			listenSocket.BeginAccept(this.onAcceptingSocket, listenSocket);
+			listenSocket.BeginAccept(onAcceptingSocket, listenSocket);
 		}
 
 		public void Close() {
-			this.listenSocket.Close();
+			listenSocket.Close();
 		}
 
 		private void onAcceptingSocket(IAsyncResult result) {

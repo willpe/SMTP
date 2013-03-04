@@ -19,7 +19,7 @@ namespace Smtp {
 
 		private static void OnMessageReceived(object sender, MessageReceivedEventArgs e) {
 			Console.WriteLine(e.Message.From);
-			Console.WriteLine(string.Join(", ", e.Message.To));
+			Console.WriteLine(string.Join(", ", e.Message.Recipients));
 			Console.WriteLine();
 			Console.WriteLine(e.Message.Body);
 		}

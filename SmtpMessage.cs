@@ -2,20 +2,16 @@
 
 namespace Smtp {
 	public sealed class SmtpMessage {
-		private readonly ICollection<string> to;
-
+		private readonly List<string> recipients;
 		public SmtpMessage() {
-			this.to = new List<string>();
+			recipients = new List<string>();
 		}
-
 		public string From { get; set; }
-
-		public ICollection<string> To {
+		public List<string> Recipients {
 			get { 
-				return this.to; 
+				return recipients; 
 			}
 		}
-
 		public string Body { get; set; }
 	}
 }

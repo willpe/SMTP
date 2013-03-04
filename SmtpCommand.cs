@@ -9,26 +9,24 @@ namespace Smtp {
 		private readonly string commandCode;
 		private readonly string parameters;
 		
-
-
-		public SmtpCommand(string commandCode, string parameters) {
-			if (string.IsNullOrEmpty(commandCode)) {
-				throw new ArgumentNullException("commandCode");
+		public SmtpCommand(string _commandCode, string _parameters) {
+			if (string.IsNullOrEmpty(_commandCode)) {
+				throw new ArgumentNullException("_commandCode");
 			}
 
-			this.commandCode = commandCode.ToUpperInvariant();
-			this.parameters = parameters;
+			commandCode = _commandCode.ToUpperInvariant();
+			parameters = _parameters;
 		}
 
 		public string Parameters {
 			get { 
-				return this.parameters; 
+				return parameters; 
 			}
 		}
 
 		public string CommandCode {
 			get { 
-				return this.commandCode; 
+				return commandCode; 
 			}
 		}
 
@@ -36,14 +34,11 @@ namespace Smtp {
 			if (message.Length < MESSAGE_LENGTH) {
 				return null;
 			}
-
-			var commandCode = message.Substring(0, MESSAGE_LENGTH);
-
+			string commandCode = message.Substring(0, MESSAGE_LENGTH);
 			string parameters = null;
 			if (message.Length > MESSAGE_LENGTH) {
 				parameters = message.Substring(MESSAGE_LENGTH, message.Length - MESSAGE_LENGTH).Trim();
 			}
-
 			return new SmtpCommand(commandCode, parameters);
 		}
 	}
