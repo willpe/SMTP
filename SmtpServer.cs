@@ -1,72 +1,52 @@
-﻿//---------------------------------------------------------------------------------
-// Copyright (c) 2012, Microsoft Corporation
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//---------------------------------------------------------------------------------
+﻿using System;
+using System.Net;
+using System.Net.Sockets;
 
-namespace Smtp
-{
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
+namespace Smtp {
+	public sealed class SmtpServer {
+		private readonly Socket listenSocket;
+		private readonly int port;
 
-    public sealed class SmtpServer
-    {
-        private readonly Socket listenSocket;
-        private readonly int port;
+		public SmtpServer(int _port) {
+			port = _port;
+			listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		}
 
-        public SmtpServer(int port)
-        {
-            this.port = port;
-            this.listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        }
+		public event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+		public int Port {
+			get { 
+				return port; 
+			}
+		}
 
-        public int Port
-        {
-            get { return this.port; }
-        }
+		public void Open() {
+			IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
+			listenSocket.Bind(endpoint);
+			listenSocket.Listen(255);
+			listenSocket.BeginAccept(onAcceptingSocket, listenSocket);
+		}
 
-        public void Open()
-        {
-            var endpoint = new IPEndPoint(IPAddress.Any, this.port);
+		public void Close() {
+			listenSocket.Close();
+		}
 
-            this.listenSocket.Bind(endpoint);
-            this.listenSocket.Listen(255);
-            this.listenSocket.BeginAccept(this.OnAcceptingSocket, null);
-        }
+		private void onAcceptingSocket(IAsyncResult result) {
+			try {
+				SmtpSession session = new SmtpSession(listenSocket.EndAccept(result));
+				session.MessageReceived += onSessionMessageReceived;
+			} catch {
+				Console.WriteLine("SMTP Session is destroyed");
+				Console.ReadKey();
+			} finally {
+				listenSocket.BeginAccept(onAcceptingSocket, listenSocket);						
+			}
+		}
 
-        public void Close()
-        {
-            this.listenSocket.Close();
-        }
-
-        private void OnAcceptingSocket(IAsyncResult result)
-        {
-            var acceptedSocket = this.listenSocket.EndAccept(result);
-            var session = new SmtpSession(acceptedSocket);
-            session.MessageReceived += this.OnSessionMessageReceived;
-
-            this.listenSocket.BeginAccept(this.OnAcceptingSocket, null);
-        }
-
-        private void OnSessionMessageReceived(object sender, MessageReceivedEventArgs e)
-        {
-            if (this.MessageReceived != null)
-            {
-                this.MessageReceived(this, e);
-            }
-        }
-    }
+		private void onSessionMessageReceived(object sender, MessageReceivedEventArgs e) {
+			if (MessageReceived != null) {
+				MessageReceived(this, e);
+			}
+		}
+	}
 }
