@@ -5,11 +5,11 @@ namespace Smtp {
 	public static class Program {
 		private const int PORT = 25;
 		public static void Main() {
-			var server = new SmtpServer(PORT);
+			SmtpServer server = new SmtpServer(PORT);
 			server.Open();
 			server.MessageReceived += OnMessageReceived;
 
-			using (var client = new SmtpClient("localhost", PORT)) {
+			using (SmtpClient client = new SmtpClient("localhost", PORT)) {
 				client.Send("kalashnikovisme@gmail.com", "kalashnikovisme@gmail.com", "Hello World", "Dear World,\r\n\r\nHello!\r\n\r\nWill");
 			}
 

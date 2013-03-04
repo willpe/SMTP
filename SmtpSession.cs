@@ -60,8 +60,9 @@ namespace Smtp {
 			var commands = command.Split(new[] { SmtpCommand.TERMINATION_SEQUENCE }, StringSplitOptions.RemoveEmptyEntries);
 			for (int i = 0; i < commands.Length; i++) {
 				var smtpCommand = SmtpCommand.Parse(commands[i]);
-				var reply = this.executeCommand(smtpCommand);
-				this.sendReply(reply);
+				SmtpReply reply = this.executeCommand(smtpCommand);
+				sendReply(reply);
+				Console.WriteLine(reply.Message, reply.ReplyCode.ToString());
 			}
 		}
 
@@ -75,26 +76,26 @@ namespace Smtp {
 		private SmtpReply executeCommand(SmtpCommand command) {
 			switch (command.CommandCode) {
 				case "HELO":
-				case "EHLO":
+					Console.WriteLine("250 localhost is ready");
 					return this.connect(command);
-
+				case "EHLO":
+					return connect(command);
 				case "MAIL":
 					return this.createMail(command);
-
 				case "RCPT":
 					return this.addRecipient(command);
-
 				case "DATA":
-					return this.startReadingData(command);
-
+					return this.startReadingData();
+				case "RSET":
+					return interrupt();
 				case "QUIT":
-					return this.quit(command);
+					return this.quit();
 			}
 			throw new InvalidOperationException("Command Not Understood: " + command.CommandCode);
 		}
 
 		private SmtpReply connect(SmtpCommand command) {
-			this.sender = command.Parameters;
+			sender = command.Parameters;
 			return SmtpReply.Ok;
 		}
 
@@ -109,7 +110,7 @@ namespace Smtp {
 			return SmtpReply.Ok;
 		}
 
-		private SmtpReply startReadingData(SmtpCommand command) {
+		private SmtpReply startReadingData() {
 			this.isReadingData = true;
 			return new SmtpReply(ReplyCode.StartMailInput, "Send the mail data, end with .");
 		}
@@ -121,14 +122,21 @@ namespace Smtp {
 			this.onMessageReceived();
 		}
 
-		private SmtpReply quit(SmtpCommand command) {
+		private SmtpReply interrupt() {
+			sender = null;
+			return new SmtpReply(ReplyCode.Ok, "Proccess has interrupted");
+		}
+		
+		private SmtpReply quit() {
 			this.isClosed = true;
 			return new SmtpReply(ReplyCode.ServiceClosing, "Service closing transmission channel");
 		}
 
+		
+
 		private void sendReply(SmtpReply response) {
-			var sendBuffer = Encoding.UTF8.GetBytes(response.ToString());
-			this.stream.Write(sendBuffer, 0, sendBuffer.Length);
+			byte[] sendBuffer = Encoding.UTF8.GetBytes(response.ToString());
+			stream.Write(sendBuffer, 0, sendBuffer.Length);
 		}
 
 		private void onMessageReceived() {

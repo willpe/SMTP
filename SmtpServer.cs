@@ -7,9 +7,9 @@ namespace Smtp {
 		private readonly Socket listenSocket;
 		private readonly int port;
 
-		public SmtpServer(int port) {
-			this.port = port;
-			this.listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		public SmtpServer(int _port) {
+			port = _port;
+			listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 		}
 
 		public event EventHandler<MessageReceivedEventArgs> MessageReceived;
@@ -21,10 +21,10 @@ namespace Smtp {
 		}
 
 		public void Open() {
-			IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, this.port);
-			this.listenSocket.Bind(endpoint);
-			this.listenSocket.Listen(255);
-			this.listenSocket.BeginAccept(this.onAcceptingSocket, null);
+			IPEndPoint endpoint = new IPEndPoint(IPAddress.Any, port);
+			listenSocket.Bind(endpoint);
+			listenSocket.Listen(255);
+			listenSocket.BeginAccept(this.onAcceptingSocket, listenSocket);
 		}
 
 		public void Close() {
@@ -33,7 +33,7 @@ namespace Smtp {
 
 		private void onAcceptingSocket(IAsyncResult result) {
 			try {
-				SmtpSession session = new SmtpSession(this.listenSocket.EndAccept(result));
+				SmtpSession session = new SmtpSession(listenSocket.EndAccept(result));
 				session.MessageReceived += onSessionMessageReceived;
 			} catch {
 				Console.WriteLine("SMTP Session is destroyed");
@@ -44,8 +44,8 @@ namespace Smtp {
 		}
 
 		private void onSessionMessageReceived(object sender, MessageReceivedEventArgs e) {
-			if (this.MessageReceived != null) {
-				this.MessageReceived(this, e);
+			if (MessageReceived != null) {
+				MessageReceived(this, e);
 			}
 		}
 	}
