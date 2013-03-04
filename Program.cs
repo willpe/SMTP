@@ -3,7 +3,7 @@ using System.Net.Mail;
 
 namespace Smtp {
 	public static class Program {
-		private const int PORT = 84;
+		private const int PORT = 25;
 		public static void Main() {
 			var server = new SmtpServer(PORT);
 			server.Open();

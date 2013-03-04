@@ -32,9 +32,15 @@ namespace Smtp {
 		}
 
 		private void onAcceptingSocket(IAsyncResult result) {
-			var session = new SmtpSession(this.listenSocket.EndAccept(result));
-			session.MessageReceived += this.onSessionMessageReceived;
-			this.listenSocket.BeginAccept(this.onAcceptingSocket, null);
+			try {
+				SmtpSession session = new SmtpSession(this.listenSocket.EndAccept(result));
+				session.MessageReceived += onSessionMessageReceived;
+			} catch {
+				Console.WriteLine("SMTP Session is destroyed");
+				Console.ReadKey();
+			} finally {
+				listenSocket.BeginAccept(onAcceptingSocket, listenSocket);						
+			}
 		}
 
 		private void onSessionMessageReceived(object sender, MessageReceivedEventArgs e) {
